@@ -1,31 +1,15 @@
-import { ChangeEvent, FormEvent, useState } from "react";
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import ReviewPage from './pages/ReviewPage';
 
 function App() {
-  const [inputVideoLink, setInputVideoLink] = useState<string>('');
-
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setInputVideoLink(e.target.value);
-  }
-
-  const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-  }
-
   return (
-    <div className="p-8">
-      <h1 className="font-bold mb-4">Hello world!</h1>
-      <form onSubmit={handleFormSubmit}>
-        <input
-          className="text-black"
-          placeholder='YouTube video link here'
-          value={inputVideoLink}
-          onChange={handleInputChange}
-          required
-        ></input>
-        <input type='submit'></input>
-      </form>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path='/' element={<HomePage />} />
+        <Route path='/video/:id' element={<ReviewPage />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 

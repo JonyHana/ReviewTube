@@ -1,2 +1,2 @@
 # ReviewTube
-A website that allows users to post response reviews/comments with dynamic content for YouTube videos.
+A website that allows users to post YouTube video response reviews/comments in a Medium-like article layout.
