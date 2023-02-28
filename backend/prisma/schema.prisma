@@ -1,0 +1,35 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id      Int      @id @default(autoincrement())
+  email   String   @unique
+  reviews Review[]
+}
+
+model Review {
+  id     Int    @id @default(autoincrement())
+  body   String
+  //createdOn DateTime @default(now())
+  //editedOn? DateTime
+  user   User   @relation(fields: [userId], references: [id])
+  userId Int
+
+  //filePath String // for S3 bucket, to replace body field as storage.
+  ytVideoId String
+
+  // // https://www.prisma.io/docs/concepts/components/prisma-schema/relations/self-relations#one-to-many-self-relations
+  // // A Post can either have a parent (is a reply post) or no parent (is not a reply post).
+  // parent  Post?  @relation("ParentReplies", fields: [userId], references: [id])
+  // // A Post can have either zero or more replies.
+  // replies Post[] @relation("ParentReplies")
+}
