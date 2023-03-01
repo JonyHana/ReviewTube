@@ -102,11 +102,6 @@
   },
   
   // https://stackoverflow.com/questions/68967489/typescript-recognizing-process-env-variables-as-undefined-despite-being-in-envir
-  "ts-node": {
-    "files": true
-  },
-  "include": [
-    "src/**/*.ts",
-    "types/*.ts"
-  ]
+  "ts-node": { "files": true },
+  "include": [ "src/**/*.ts" ]
 }

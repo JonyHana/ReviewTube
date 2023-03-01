@@ -1,6 +1,8 @@
 import express from 'express';
 import passport from 'passport';
 
+require("dotenv").config();
+
 const router = express.Router();
 
 // Note: This must be in this order! See https://stackoverflow.com/questions/29111571/passports-req-isauthenticated-always-returning-false-even-when-i-hardcode-done

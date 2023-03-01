@@ -1,10 +1,23 @@
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 
 const HomePage = () => {
   const [inputVideoLink, setInputVideoLink] = useState<string>('');
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/user-ctx/`, { credentials: "include" })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.email) {
+        console.log('User authed', data);
+      }
+      else {
+        console.log('User not authenticated');
+      }
+    });
+  }, []);
   
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setInputVideoLink(e.target.value);
@@ -38,7 +51,7 @@ const HomePage = () => {
         onChange={handleInputChange}
         required
         ></input>
-        <input type='submit'></input>
+        <input type='submit' value="Submit"></input>
       </form>
     </div>
   )
