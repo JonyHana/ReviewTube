@@ -19,34 +19,45 @@ const HomePage = () => {
     });
   }, []);
   
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = async (e: ChangeEvent<HTMLInputElement>) => {
     setInputVideoLink(e.target.value);
   }
 
-  const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // TODO: POST to server with URL (check if valid, check if YT, check if exists or not in DB, etc.)
-    // https://bobbyhadz.com/blog/react-redirect-after-form-submit
-    navigate('/video/' + inputVideoLink);
-    /*try {
-      let urlObj = new URL(inputVideoLink);
-      console.log(urlObj);
-      //let params = urlObj.search;
-      //console.log(params.substring(3, params.length - 1));
-      //navigate('/video/' + inputVideoLink);
+
+    // Parses the video ID from the YouTube video URL.
+    //  Source: https://stackoverflow.com/a/3452617
+    let videoId = inputVideoLink.split('v=')[1];
+    var ampersandPosition = videoId.indexOf('&');
+    if(ampersandPosition != -1) {
+      videoId = videoId.substring(0, ampersandPosition);
     }
-    catch (e) {
-      //throw e;
-    }*/
+
+    
+    let res = await fetch(
+      `${import.meta.env.VITE_API_URL}/video/${videoId}`,
+      { method: 'GET' }
+    );
+    let data = await res.json();
+    
+    console.log(data);
+    
+    if (data.statusCode !== 0) {
+      navigate('/video/' + videoId, { state: { reviews: data } });
+    }
+    else {
+      // TODO: Show popup of error msg.
+    }
   }
   
   return (
     <div className="p-8">
-      <h1 className="font-bold mb-4">Hello world!</h1>
+      <h1 className="font-bold mb-4">Welcome to ReviewTube</h1>
       <form onSubmit={handleFormSubmit}>
         <input
         className="text-black"
-        placeholder='YouTube video ID here'
+        placeholder='Enter YouTube Video URL Here'
         value={inputVideoLink}
         onChange={handleInputChange}
         required

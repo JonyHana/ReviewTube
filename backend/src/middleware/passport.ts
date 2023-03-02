@@ -31,12 +31,13 @@ passport.use(new GoogleStrategy({
 },
 async function (req: any, accessToken: any, refreshToken: any, profile: any, done: any) {
   const email = profile.email;
+  const displayName = profile.displayName;
 
   let user = await prisma.user.findUnique({ where: { email } });
 
   // If Prisma User does not exist in DB, create.
   if (!user) {
-    user = await prisma.user.create({ data: { email } });
+    user = await prisma.user.create({ data: { email, displayName } });
   }
 
   return done(null, user);

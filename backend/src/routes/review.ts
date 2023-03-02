@@ -18,7 +18,8 @@ const isLoggedIn = async (req: Request, res: Response, next: NextFunction) => {
   res.status(401).json({ msg: 'Unauthorized, not logged in.' });
 }
 
-// Authorization middleware, specifically for the routes below, to execute before user hits one of said route endpoints.
+// Authorization middleware, specifically for the routes below, 
+//  to execute before user hits one of said route endpoints.
 router.use(isLoggedIn);
 
 // When the user posts a review.

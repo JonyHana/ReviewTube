@@ -14,7 +14,8 @@ type T_DBUpdateReview = {
 
 export async function getReviews(ytVideoId: string) {
   const reviews = await prisma.review.findMany({
-    where: { ytVideoId }
+    where: { ytVideoId },
+    select: { body: true }
   });
 
   return reviews;

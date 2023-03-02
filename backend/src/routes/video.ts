@@ -33,7 +33,14 @@ type T_YTInfoBody = {
 // This will gather the reviews (if there's any) for that review page.
 //  If there are none, it will let the user know.
 router.get('/:id', async (req: Request, res: Response) => {
-  const { id } = req.params;
+  let { id } = req.params;
+
+  // YouTube video IDs are 11 characters long.
+  //  Though Google has not mentioned this being an indefinite standard,
+  //  so this could end up changing in the future.
+  if (id.length > 11) {
+    id = id.substring(0, 11);
+  }
 
   // Check to see if YT video exists.
   //  If checking through the API and doesn't exist then (public) video doesn't exist.
@@ -43,35 +50,22 @@ router.get('/:id', async (req: Request, res: Response) => {
   let fetchResData: T_YTInfoBody = await fetchRes.json();
   
   if (fetchResData.items.length === 0) {
-    res.json({
-      msg: 'Video does not exist.',
-      statusCode: 0,
-      errorCode: 0
+    return res.json({
+      error: 'Video does not exist.',
     });
-    return;
   }
   
   if (!fetchResData.items[0].status.embeddable) {
-    res.json({
-      msg: 'Video exists but cannot be embedded. Prohibited by the YouTube channel of the video.',
-      statusCode: 0,
-      errorCode: 1
+    return res.json({
+      error: 'Video exists but cannot be embedded. Prohibited by the YouTube channel of the video.',
     });
     // Note: Maybe load existing reviews but don't allow people to post reviews?
-    return;
+    //  If so, will need to check if video has reviews first, otherwise throw error message above.
   }
 
   const reviews = await getReviews(id);
   
-  if (reviews.length === 0) {
-    res.json({ 
-      msg: 'This video has no reviews. Be the first to post a review!',
-      statusCode: 1
-    });
-  }
-  else {
-    res.json({ reviews });
-  }
+  res.json(reviews);
 });
 
 export default router;
