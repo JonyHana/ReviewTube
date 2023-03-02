@@ -1,18 +1,22 @@
+require("dotenv").config();
+
 import express, { Request, Response, NextFunction } from 'express';
 import session, { MemoryStore } from 'express-session';
 import cors from 'cors';
 
 import authMiddleware from './middleware/passport';
+import reviewRoute from './routes/review';
+import videoRoute from './routes/video';
 
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// 'origin'      -> Currently set to access the backend API domain (api.site.com) only from our frontend domain (site.com).
-// 'credentials' -> True = To include cookies on cross-origin requests.
 app.use(cors({
+  // Currently set to access the backend API domain (api.site.com) only from our frontend domain (site.com).
   origin: `${process.env.FRONTEND_URL}`,
+  // True = To include cookies on cross-origin requests.
   credentials: true
 }));
 
@@ -32,25 +36,26 @@ app.use(session({
 
 app.use(authMiddleware);
 
-// ------------------------------------- /
+app.use('/video', videoRoute);
+app.use('/review', reviewRoute);
 
 app.get('/user-ctx', async (req: Request, res: Response) => {
   res.json({ email: req.user?.email ?? null });
 });
 
-// app.get('/test', async (req: Request, res: Response) => {
-//   const users = await prisma.user.findMany({});
-//   const reviews = await prisma.review.findMany({});/*
-//     //where: { published: true },
-//     include: { user: true },
-//   })*/
-//   res.json({
-//     isLoggedIn: req.user ?? false,
-//     reviews,
-//     users
-//   });
-// });
-
-// ------------------------------------- /
+// DEBUGGING //
+import { prisma } from './utils/db';
+app.get('/test', async (req: Request, res: Response) => {
+  const users = await prisma.user.findMany({});
+  const reviews = await prisma.review.findMany({});/*
+    //where: { published: true },
+    include: { user: true },
+  })*/
+  res.json({
+    isLoggedIn: req.user ?? false,
+    reviews,
+    users
+  });
+});
 
 app.listen(3000);

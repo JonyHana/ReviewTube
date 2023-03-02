@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import getVideoReviews from '../controllers/getVideoReviews';
+import { getReviews } from '../controllers/reviewController';
 
 const router = express.Router();
 
@@ -30,7 +30,9 @@ type T_YTInfoBody = {
 };
 
 // When either a user or visitor searches a review page by YT video id.
-router.get('/video/:id', async (req: Request, res: Response) => {
+// This will gather the reviews (if there's any) for that review page.
+//  If there are none, it will let the user know.
+router.get('/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
 
   // Check to see if YT video exists.
@@ -59,7 +61,7 @@ router.get('/video/:id', async (req: Request, res: Response) => {
     return;
   }
 
-  const reviews = await getVideoReviews(id);
+  const reviews = await getReviews(id);
   
   if (reviews.length === 0) {
     res.json({ 
@@ -71,3 +73,5 @@ router.get('/video/:id', async (req: Request, res: Response) => {
     res.json({ reviews });
   }
 });
+
+export default router;

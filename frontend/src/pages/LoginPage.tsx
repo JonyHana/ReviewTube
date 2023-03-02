@@ -3,7 +3,7 @@ const LoginPage = () => {
   
   return (
     <>
-      <a href={`${API_URL}/login/federated/google`}>Click to Login</a>
+      <a href={`${API_URL}/login/federated/google`}>Click Here to Login</a>
     </>
   )
 }

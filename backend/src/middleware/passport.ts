@@ -1,7 +1,7 @@
 import express from 'express';
 import passport from 'passport';
 
-require("dotenv").config();
+import { prisma } from '../utils/db';
 
 const router = express.Router();
 
@@ -29,16 +29,20 @@ passport.use(new GoogleStrategy({
   scope: [ 'email', 'profile' ],
   passReqToCallback: true
 },
-function (req: any, accessToken: any, refreshToken: any, profile: any, done: any) {
-  // If Prisma User does not exist in DB, create.
-  //prisma.user.findUnique({ where: });
-  
-  console.log("GoogleStrategy verification callback for:", profile.email);
+async function (req: any, accessToken: any, refreshToken: any, profile: any, done: any) {
+  const email = profile.email;
 
-  return done(null, profile);
+  let user = await prisma.user.findUnique({ where: { email } });
+
+  // If Prisma User does not exist in DB, create.
+  if (!user) {
+    user = await prisma.user.create({ data: { email } });
+  }
+
+  return done(null, user);
 }));
 
-// The comment block below was derived from https://github.com/passport/todos-express-google/blob/main/routes/auth.js#L54
+// The (modified) comment block below was derived from https://github.com/passport/todos-express-google/blob/main/routes/auth.js#L54
 // ----
 // Configure Passport authenticated session persistence.
 //
@@ -46,18 +50,13 @@ function (req: any, accessToken: any, refreshToken: any, profile: any, done: any
 // to serialize users into and deserialize users out of the session.  In a
 // production-quality application, this would typically be as simple as
 // supplying the user ID when serializing, and querying the user record by ID
-// from the database when deserializing.  However, due to the fact that this
-// example does not have a database, the complete Google profile is serialized
-// and deserialized.
+// from the database when deserializing.  However, due to the fact that the "todos-express-google"
+// example does not have a database, the complete Google profile is serialized and deserialized.
 passport.serializeUser(function(user: any, done) {
-  // Note: In the future, might need to supply user ID here in the future?
-  //  According to author's comment above.
   return done(null, user);
 });
 
 passport.deserializeUser(function(user: any, done) {
-  // Note: In the future, might need to query the user record by ID from the database when deserializing?
-  //  According to author's comment above.
   return done(null, user);
 });
 
