@@ -42,6 +42,11 @@ router.get('/:id', async (req: Request, res: Response) => {
     id = id.substring(0, 11);
   }
 
+  // Note: Maybe load existing reviews but don't allow people to post reviews?
+  //  If so, will need to check if video has reviews first, otherwise just execute code blocks below countReviews.
+  // countReviews(id);
+  // if (countReviews(id) < 0) {
+
   // Check to see if YT video exists.
   //  If checking through the API and doesn't exist then (public) video doesn't exist.
   //  If it's in the DB but doesn't exist, then video may have been set to private or deleted.
@@ -59,8 +64,6 @@ router.get('/:id', async (req: Request, res: Response) => {
     return res.json({
       error: 'Video exists but cannot be embedded. Prohibited by the YouTube channel of the video.',
     });
-    // Note: Maybe load existing reviews but don't allow people to post reviews?
-    //  If so, will need to check if video has reviews first, otherwise throw error message above.
   }
 
   const reviews = await getReviews(id);

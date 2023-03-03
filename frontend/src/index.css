@@ -20,4 +20,20 @@
   h2 {
     @apply text-3xl;
   }
+  h4 {
+    @apply text-xl;
+  }
+}
+
+@keyframes rollout {
+  0% {
+    transform: translateY(-25px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.roll-out {
+  animation: .4s rollout;
 }

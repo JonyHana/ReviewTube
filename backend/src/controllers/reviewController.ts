@@ -12,32 +12,39 @@ type T_DBUpdateReview = {
   body: string;
 }
 
-export async function getReviews(ytVideoId: string) {
-  const reviews = await prisma.review.findMany({
-    where: { ytVideoId },
-    select: { body: true }
-  });
+// export async function countReviews(ytVideoId: string) {
+//   return await prisma.review.count({
+//     where: { ytVideoId }
+//   });
+// }
 
-  return reviews;
+export async function getReviews(ytVideoId: string) {
+  return await prisma.review.findMany({
+    where: { ytVideoId },
+    select: {
+      body: true,
+      user: {
+        select: {
+          displayName: true
+        }
+      }
+    }
+  });
 }
 
 export async function createReview(data: T_DBCreateReview) {
-  const review = await prisma.review.create({
+  return await prisma.review.create({
     data: {
       ytVideoId: data.ytVideoId,
       body: data.body,
       user: { connect: { email: data.userEmail } },
     },
   });
-
-  return review;
 }
 
 export async function updateReview(data: T_DBUpdateReview) {
-  const post = await prisma.review.update({
+  return await prisma.review.update({
     where: { id: data.reviewId },
     data: { body: data.body },
   });
-
-  return post;
 }
