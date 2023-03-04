@@ -1,29 +1,18 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
+import LoginLink from "../components/LoginLink";
+import { T_UserInfo_Prop } from "../types";
 
-const HomePage = () => {
+const HomePage = ({ user }: T_UserInfo_Prop) => {
   const [inputVideoLink, setInputVideoLink] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
+  
   // A hacky method used for the text roll-in transition everytime the error message element re-renders.
   //  Source: https://stackoverflow.com/questions/63186710/how-to-trigger-a-css-animation-on-every-time-a-react-component-re-renders
   //  A new key must be set for the element that displays the message so that the CSS animation resets (due to component re-rendering).
   const [errorMsgSeedKey, setErrorMsgKeySeed] = useState<number>(Math.random());
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/user-ctx/`, { credentials: "include" })
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.email) {
-        console.log('User authed', data);
-      }
-      else {
-        console.log('User not authenticated');
-      }
-    });
-  }, []);
   
   const handleInputChange = async (e: ChangeEvent<HTMLInputElement>) => {
     setInputVideoLink(e.target.value);
@@ -45,8 +34,6 @@ const HomePage = () => {
       { method: 'GET' }
     );
     let data = await res.json();
-
-    console.log(data);
     
     if (!data.error) {
       navigate('/video/' + videoId, { state: { reviews: data } });
@@ -60,6 +47,9 @@ const HomePage = () => {
   return (
     <div className="p-8">
       <h1 className="font-bold mb-4">Welcome to ReviewTube</h1>
+
+      {!user ? <LoginLink /> : null}
+
       <form className="w-full max-w-sm" onSubmit={handleFormSubmit}>
         <div className="flex items-center border-b border-teal-500 py-2">
           <input

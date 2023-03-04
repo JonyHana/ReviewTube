@@ -40,7 +40,11 @@ app.use('/video', videoRoute);
 app.use('/review', reviewRoute);
 
 app.get('/user-ctx', async (req: Request, res: Response) => {
-  res.json({ email: req.user?.email ?? null });
+  const user = req.user;
+  res.json({
+    email:  user ? user.email       : null,
+    name:   user ? user.displayName : null,
+  });
 });
 
 // DEBUGGING //
