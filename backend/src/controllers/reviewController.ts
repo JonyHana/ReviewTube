@@ -39,6 +39,10 @@ export async function createReview(data: T_DBCreateReview) {
       body: data.body,
       user: { connect: { email: data.userEmail } },
     },
+    select: {
+      body: true,
+      user: { select: { displayName: true } }
+    }
   });
 }
 

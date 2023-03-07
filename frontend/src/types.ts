@@ -11,3 +11,7 @@ export type T_UserInfo = {
 export type T_UserInfo_Prop = {
   user: T_UserInfo | null;
 };
+
+export type T_ReviewEditor_Prop = {
+  uploadCallback: Function;
+}

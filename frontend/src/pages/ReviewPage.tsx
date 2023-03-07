@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
 import LoginLink from '../components/LoginLink';
+import ReviewEditor from '../components/ReviewEditor';
 import { T_Review, T_UserInfo_Prop } from '../types';
 
 const ReviewPage = ({ user }: T_UserInfo_Prop) => {
@@ -26,18 +27,38 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
       });
     }
   }, []);
+
+  const uploadReview = async (reviewBody: string) => {
+    if (reviewBody.length < 0) return;
+
+    let res = await fetch(
+      `${import.meta.env.VITE_API_URL}/review/`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          ytVideoId: id as string,
+          reviewBody
+        })
+      }
+    );
+    let data = await res.json();
+    
+    setReviews([ ...reviews, data]);
+  }
   
   return (
     <>
       {!errorMsg ? (
           <>
             <iframe
-              width="1903"
-              height="800"
+              className='w-full h-[800px]'
               src={"https://www.youtube.com/embed/" + id}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen />
             <div className='p-8'>
+              {user && <ReviewEditor uploadCallback={uploadReview} /> }
+
               {reviews && reviews.length > 0 ? (
                 reviews.map((review, i) => {
                   return (
@@ -49,7 +70,7 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
                 })
               ) : (
                 <>
-                  <h4>No reviews found. Be the first one to post! {!user ? <LoginLink /> : null}</h4>
+                  <h4>No reviews found. Be the first one to post! {!user && <LoginLink />}</h4>
                 </>
               )}
             </div>
