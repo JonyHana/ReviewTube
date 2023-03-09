@@ -38,15 +38,17 @@ router.get('/:id', async (req: Request, res: Response) => {
   // YouTube video IDs are 11 characters long.
   //  Though Google has not mentioned this being an indefinite standard,
   //  so this could end up changing in the future.
-  if (id.length > 11) {
-    id = id.substring(0, 11);
-  }
+  id = id.substring(0, 11);
 
   // Note: Maybe load existing reviews but don't allow people to post reviews?
   //  If so, will need to check if video has reviews first, otherwise just execute code blocks below countReviews.
   // countReviews(id);
   // if (countReviews(id) < 0) {
 
+  // Note: Accidentally hit YT V3 API too much.
+  //  Currently have the following block of code commented off while I test out reviews functionality for now.
+  //console.log('ping check', new Date().getTime().toString().substring(0, Math.floor(Math.random() * 12)));
+  /*
   // Check to see if YT video exists.
   //  If checking through the API and doesn't exist then (public) video doesn't exist.
   //  If it's in the DB but doesn't exist, then video may have been set to private or deleted.
@@ -65,9 +67,9 @@ router.get('/:id', async (req: Request, res: Response) => {
       error: 'Video exists but cannot be embedded. Prohibited by the YouTube channel of the video.',
     });
   }
-
-  const reviews = await getReviews(id);
+  */
   
+  const reviews = await getReviews(id);
   res.json(reviews);
 });
 

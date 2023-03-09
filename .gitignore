@@ -1,4 +1,7 @@
-.env
+backend/prisma/dev.db*
+backend/.env
+
+notes.txt
 
 .vscode
 
@@ -15,7 +18,3 @@ node_modules
 dist
 dist-ssr
 *.local
-
-notes.txt
-
-backend/prisma/dev.db*

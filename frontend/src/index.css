@@ -37,3 +37,13 @@
 .roll-out {
   animation: .4s rollout;
 }
+
+/* Necessary text overflow prevention for pre elements inside React Markdown component.*/
+pre {
+  overflow-x: auto;
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+}
