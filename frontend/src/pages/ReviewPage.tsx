@@ -81,19 +81,28 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen />
             <div className='p-8'>
-              {user
-                ? (lockEditor
+              {user &&
+                lockEditor
                   ? <LoadingSpinner />
                   : <ReviewEditor uploadCallback={uploadReview} />
-                )
-                : (<>
+              }
+
+              {/* Not sure of a better way of doing this. Ternary in JSX is hell..*/}
+              {!user
+                ? (<>
                     <h4 className='inline-block mr-2'>Log in to start posting!</h4>
                     <LoginButton />
-                  </>
+                  </>)
+                : (!reviews || reviews.length === 0 && (
+                    <>
+                      <h4 className='inline-block mr-2'>No reviews found. Be the first one to post!</h4>
+                      {!user && <LoginButton />}
+                    </>
+                  )
                 )
               }
 
-              {reviews && reviews.length > 0 ? (
+              {reviews && reviews.length > 0 && (
                 <div className='flex flex-col-reverse'>
                   {reviews.map((review, i) => {
                     return (
@@ -104,10 +113,6 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
                     )
                   })}
                 </div>
-              ) : (
-                <>
-                  <h4>No reviews found. Be the first one to post! {!user && <LoginButton />}</h4>
-                </>
               )}
             </div>
           </>
