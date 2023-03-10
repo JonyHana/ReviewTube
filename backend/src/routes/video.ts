@@ -47,7 +47,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 
   // Note: Accidentally hit YT V3 API too much.
   //  Currently have the following block of code commented off while I test out reviews functionality for now.
-  //console.log('ping check', new Date().getTime().toString().substring(0, Math.floor(Math.random() * 12)));
+  console.log('ping check', new Date().getTime().toString().substring(0, Math.floor(Math.random() * 12)));
   /*
   // Check to see if YT video exists.
   //  If checking through the API and doesn't exist then (public) video doesn't exist.
