@@ -42,24 +42,21 @@ app.use('/review', reviewRoute);
 app.get('/user-ctx', async (req: Request, res: Response) => {
   const user = req.user;
   res.json({
-    email:  user ? user.email       : null,
-    name:   user ? user.displayName : null,
+    displayName:  user?.displayName ?? null,
+    id:           user?.id ?? null
   });
 });
 
 // DEBUGGING //
-import { prisma } from './utils/db';
-app.get('/test', async (req: Request, res: Response) => {
-  const users = await prisma.user.findMany({});
-  const reviews = await prisma.review.findMany({});/*
-    //where: { published: true },
-    include: { user: true },
-  })*/
-  res.json({
-    isLoggedIn: req.user ?? false,
-    reviews,
-    users
-  });
-});
+// import { prisma } from './utils/db';
+// app.get('/test', async (req: Request, res: Response) => {
+//   const users = await prisma.user.findMany({});
+//   const reviews = await prisma.review.findMany({});
+//   res.json({
+//     isLoggedIn: req.user ?? false,
+//     reviews,
+//     users
+//   });
+// });
 
 app.listen(3000);

@@ -44,30 +44,29 @@ router.get('/:id', async (req: Request, res: Response) => {
   //  If so, will need to check if video has reviews first, otherwise just execute code blocks below countReviews.
   // countReviews(id);
   // if (countReviews(id) < 0) {
-
-  // Note: Accidentally hit YT V3 API too much.
-  //  Currently have the following block of code commented off while I test out reviews functionality for now.
-  console.log('ping check', new Date().getTime().toString().substring(0, Math.floor(Math.random() * 12)));
-  /*
-  // Check to see if YT video exists.
-  //  If checking through the API and doesn't exist then (public) video doesn't exist.
-  //  If it's in the DB but doesn't exist, then video may have been set to private or deleted.
-  let apiFetch = `https://www.googleapis.com/youtube/v3/videos?key=${YT_API_KEY}&part=status&id=${id}`;
-  let fetchRes = await fetch(apiFetch);
-  let fetchResData: T_YTInfoBody = await fetchRes.json();
   
-  if (fetchResData.items.length === 0) {
-    return res.json({
-      error: 'Video does not exist.',
-    });
+  // Note: Added production check so I don't keep hitting the third-party API during development.
+  //console.log('ping check', new Date().getTime().toString().substring(0, Math.floor(Math.random() * 12)));
+  if (process.env.NODE_ENV === 'production') {
+    // Check to see if YT video exists.
+    //  If checking through the API and doesn't exist then (public) video doesn't exist.
+    //  If it's in the DB but doesn't exist, then video may have been set to private or deleted.
+    let apiFetch = `https://www.googleapis.com/youtube/v3/videos?key=${YT_API_KEY}&part=status&id=${id}`;
+    let fetchRes = await fetch(apiFetch);
+    let fetchResData: T_YTInfoBody = await fetchRes.json();
+    
+    if (fetchResData.items.length === 0) {
+      return res.json({
+        error: 'Video does not exist.',
+      });
+    }
+    
+    if (!fetchResData.items[0].status.embeddable) {
+      return res.json({
+        error: 'Video exists but cannot be embedded. Prohibited by the YouTube channel of the video.',
+      });
+    }
   }
-  
-  if (!fetchResData.items[0].status.embeddable) {
-    return res.json({
-      error: 'Video exists but cannot be embedded. Prohibited by the YouTube channel of the video.',
-    });
-  }
-  */
   
   const reviews = await getReviews(id);
   res.json(reviews);

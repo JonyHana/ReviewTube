@@ -30,14 +30,27 @@ passport.use(new GoogleStrategy({
   passReqToCallback: true
 },
 async function (req: any, accessToken: any, refreshToken: any, profile: any, done: any) {
-  const email = profile.email;
-  const displayName = profile.displayName;
+  const { email, displayName, picture } = profile;
 
   let user = await prisma.user.findUnique({ where: { email } });
 
   // If Prisma User does not exist in DB, create.
   if (!user) {
-    user = await prisma.user.create({ data: { email, displayName } });
+    user = await prisma.user.create({
+      data: { email, displayName, avatarURL: picture }
+    });
+  }
+  else {
+    // If the user updates their Google profile and logs back in after the changes, then auto-update their profile info.
+    if (user.avatarURL !== picture || user.displayName !== displayName) {
+      user = await prisma.user.update({
+        where: { email },
+        data: {
+          displayName: displayName,
+          avatarURL: picture
+        }
+      });
+    }
   }
 
   return done(null, user);

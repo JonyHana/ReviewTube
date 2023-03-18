@@ -3,6 +3,7 @@ declare global {
     interface User {
       displayName: string;
       email: string;
+      id: number;
     }
   }
 }

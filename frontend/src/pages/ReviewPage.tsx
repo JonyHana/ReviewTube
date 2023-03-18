@@ -40,7 +40,9 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
     )
     .then((res) => { return res.json(); })
     .then((data) => {
-      if (!data.error) { setReviews(data); }
+      if (!data.error) {
+        setReviews(data);
+      }
       else { setErrorMsg(data.error); }
     });
   }
@@ -107,7 +109,9 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
                   {reviews.map((review, i) => {
                     return (
                       <div key={i} className='m-4 p-4 bg-gray-700'>
-                        <h3 className='font-semibold mb-2'>{review.user.displayName}</h3>
+                        {review.userId === user?.id && <p>(Edit Button)</p>}
+                        <img className='inline-block mr-3' src={review.user.avatarURL} width={40} />
+                        <h4 className='inline-block font-semibold'>{review.user.displayName}</h4>
                         <ReactMarkdown children={review.body} remarkPlugins={[remarkGfm]}></ReactMarkdown>
                       </div>
                     )

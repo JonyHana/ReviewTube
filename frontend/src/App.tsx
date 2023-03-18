@@ -11,7 +11,7 @@ function App() {
     fetch(`${import.meta.env.VITE_API_URL}/user-ctx/`, { credentials: "include" })
     .then((res) => res.json())
     .then((data) => {
-      if (data.email) {
+      if (data.displayName) {
         console.log('User authed', data);
         setUserInfo(data);
       }

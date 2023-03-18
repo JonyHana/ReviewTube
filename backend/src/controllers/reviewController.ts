@@ -23,9 +23,12 @@ export async function getReviews(ytVideoId: string) {
     where: { ytVideoId },
     select: {
       body: true,
+      id: true,
+      userId: true,
       user: {
         select: {
-          displayName: true
+          displayName: true,
+          avatarURL: true
         }
       }
     }
@@ -41,7 +44,12 @@ export async function createReview(data: T_DBCreateReview) {
     },
     select: {
       body: true,
-      user: { select: { displayName: true } }
+      user: {
+        select: {
+          displayName: true,
+          avatarURL: true
+        }
+      }
     }
   });
 }
@@ -49,6 +57,9 @@ export async function createReview(data: T_DBCreateReview) {
 export async function updateReview(data: T_DBUpdateReview) {
   return await prisma.review.update({
     where: { id: data.reviewId },
-    data: { body: data.body },
+    data: {
+      body: data.body,
+      editedOn: new Date().toISOString()
+    },
   });
 }

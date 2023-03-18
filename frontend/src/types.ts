@@ -1,11 +1,16 @@
 export type T_Review = {
+  id: number;
   body: string;
-  user: { displayName: string; }
+  userId: number;
+  user: {
+    displayName: string;
+    avatarURL: string;
+  }
 }
 
 export type T_UserInfo = {
-  email: string;
-  name: string;
+  displayName: string;
+  id: number;
 };
 
 export type T_UserInfo_Prop = {

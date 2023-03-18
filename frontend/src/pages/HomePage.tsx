@@ -47,7 +47,8 @@ const HomePage = ({ user }: T_UserInfo_Prop) => {
   return (
     <div className="w-full h-screen grid place-items-center">
       <div>
-        <h1 className="font-bold mb-4">Welcome to ReviewTube</h1>
+        <h1 className="font-bold mb-4">Welcome to ReviewTube, </h1>
+        <h2 className="text-center">{ user?.displayName } 👋</h2>
 
         <form className="w-full max-w-sm mb-4" onSubmit={handleFormSubmit}>
           <div className="flex items-center border-b border-teal-500 py-2">
