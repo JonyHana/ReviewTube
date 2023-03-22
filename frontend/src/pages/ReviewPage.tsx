@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { MouseEvent, useEffect, useState } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
 
 import LoginButton from '../components/LoginButton';
@@ -7,8 +7,6 @@ import ReviewEditor from '../components/ReviewEditor';
 import { T_Review, T_UserInfo_Prop } from '../types';
 
 import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import LoadingSpinner from '../components/LoadingSpinner';
 
 const ReviewPage = ({ user }: T_UserInfo_Prop) => {
   const { id } = useParams();
@@ -16,7 +14,7 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
 
   const [reviews, setReviews] = useState<T_Review[] | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [lockEditor, setLockEditor] = useState<boolean>(false);
+  const [lockEditors, setLockEditors] = useState<boolean>(false);
 
   // This is if user accessed review page directly (didn't search from home page).
   useEffect(() => {
@@ -41,16 +39,22 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
     .then((res) => { return res.json(); })
     .then((data) => {
       if (!data.error) {
-        setReviews(data);
+        const revs: T_Review[] = [];
+        data.forEach((v: T_Review, i: number) => {
+          revs.push({ ...v, isEditing: false });
+        });
+        setReviews(revs);
       }
-      else { setErrorMsg(data.error); }
+      else {
+        setErrorMsg(data.error);
+      }
     });
   }
 
   const uploadReview = async (reviewBody: string) => {
     if (reviewBody.length < 0) return;
     
-    setLockEditor(true);
+    setLockEditors(true);
     
     fetch(
       `${import.meta.env.VITE_API_URL}/review/`, {
@@ -58,7 +62,7 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
         credentials: 'include',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-          ytVideoId: id as string,
+          ytVideoId: id,
           reviewBody
         })
       }
@@ -68,9 +72,87 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
       //console.log(data);
     })
     .finally(() => {
-      setLockEditor(false);
+      setLockEditors(false);
       refreshReviews();
     });
+  }
+  
+  const uploadEditedReview = (review: T_Review, index: number) => {
+    console.log('editReview -> ', review);
+
+    setLockEditors(true);
+
+    fetch(
+      `${import.meta.env.VITE_API_URL}/review/`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          ytVideoId: id,
+          reviewBody: review.body,
+          reviewId: review.id
+        })
+      }
+    )
+    .then((res) => { return res.json() })
+    .then((data) => {
+      //console.log(data);
+    })
+    .finally(() => {
+      setLockEditors(false);
+      refreshReviews();
+    });
+  }
+
+  // DEBUGGING // I want LoadSpinner to appear only once at a time.
+  // const uploadReview = async (reviewBody: string) => {
+  // }
+  // const uploadEditedReview = (review: T_Review, index: number) => {
+  // }
+
+  const cancelReviewEditing = (index: number) => {
+    console.log('cancelReviewEditing -> ', index);
+
+    changeReviewToEditing(index, false);
+  }
+
+  const changeReviewToEditing = (index: number, isEditing: boolean) => {
+    console.log('changeReviewToEditing -> ', index);
+    
+    const revs = [ ...reviews as T_Review[] ];
+    revs[index].isEditing = isEditing;
+    setReviews(revs);
+  }
+  
+  const renderReview = (index: number, review: T_Review) => {
+    console.log('renderReview -> ', review.userId, user?.id, review.userId === user?.id);
+
+    if (review.isEditing) {
+      return (
+        <div key={index} className='m-4 p-4 bg-gray-700'>
+          <ReviewEditor
+            lockEditor={lockEditors}
+            review={review}
+            index={index}
+            uploadEditCallback={uploadEditedReview}
+            cancelEditCallback={cancelReviewEditing}
+          />
+        </div>
+      )
+    }
+    else {
+      return (
+        <div key={index} className='m-4 p-4 bg-gray-700'>
+          {review.userId === user?.id &&
+            <button onClick={() => changeReviewToEditing(index, true)}>Edit</button>
+          }
+          <img className='inline-block mr-3' src={review.user.avatarURL} width={40} />
+          <h4 className='inline-block font-semibold'>{review.user.displayName}</h4>
+          
+          <ReactMarkdown className="prose prose-invert" children={review.body}></ReactMarkdown>
+        </div>
+      )
+    }
   }
   
   return (
@@ -83,11 +165,7 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen />
             <div className='p-8'>
-              {user &&
-                lockEditor
-                  ? <LoadingSpinner />
-                  : <ReviewEditor uploadCallback={uploadReview} />
-              }
+              {user && <ReviewEditor lockEditor={lockEditors} uploadCallback={uploadReview} />}
 
               {/* Not sure of a better way of doing this. Ternary in JSX is hell..*/}
               {!user
@@ -107,14 +185,7 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
               {reviews && reviews.length > 0 && (
                 <div className='flex flex-col-reverse'>
                   {reviews.map((review, i) => {
-                    return (
-                      <div key={i} className='m-4 p-4 bg-gray-700'>
-                        {review.userId === user?.id && <p>(Edit Button)</p>}
-                        <img className='inline-block mr-3' src={review.user.avatarURL} width={40} />
-                        <h4 className='inline-block font-semibold'>{review.user.displayName}</h4>
-                        <ReactMarkdown children={review.body} remarkPlugins={[remarkGfm]}></ReactMarkdown>
-                      </div>
-                    )
+                    return renderReview(i, review);
                   })}
                 </div>
               )}
