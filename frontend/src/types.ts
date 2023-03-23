@@ -6,6 +6,8 @@ export type T_Review = {
     displayName: string;
     avatarURL: string;
   }
+  createdOn: string;
+  editedOn: string;
 
   // Anything below this comment is not part of the schema but used for client interaction.
   isEditing: boolean;
@@ -21,7 +23,7 @@ export type T_UserInfo_Prop = {
 };
 
 export type T_ReviewEditor_Prop = {
-  lockEditor: boolean;
+  lockEditor: number | null;
   uploadCallback?: Function;
   uploadEditCallback?: Function;
   cancelEditCallback?: Function;

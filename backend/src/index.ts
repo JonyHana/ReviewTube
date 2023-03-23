@@ -47,16 +47,4 @@ app.get('/user-ctx', async (req: Request, res: Response) => {
   });
 });
 
-// DEBUGGING //
-// import { prisma } from './utils/db';
-// app.get('/test', async (req: Request, res: Response) => {
-//   const users = await prisma.user.findMany({});
-//   const reviews = await prisma.review.findMany({});
-//   res.json({
-//     isLoggedIn: req.user ?? false,
-//     reviews,
-//     users
-//   });
-// });
-
 app.listen(3000);

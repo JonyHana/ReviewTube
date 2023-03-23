@@ -30,7 +30,9 @@ export async function getReviews(ytVideoId: string) {
           displayName: true,
           avatarURL: true
         }
-      }
+      },
+      createdOn: true,
+      editedOn: true
     }
   });
 }
@@ -49,7 +51,9 @@ export async function createReview(data: T_DBCreateReview) {
           displayName: true,
           avatarURL: true
         }
-      }
+      },
+      createdOn: true,
+      editedOn: true
     }
   });
 }

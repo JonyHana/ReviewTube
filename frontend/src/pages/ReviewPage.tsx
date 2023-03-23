@@ -14,7 +14,12 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
 
   const [reviews, setReviews] = useState<T_Review[] | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [lockEditors, setLockEditors] = useState<boolean>(false);
+
+  //const [lockEditors, setLockEditors] = useState<boolean>(false);
+  // -1 for the editor that creates reviews.
+  // >= 0 for the editors of each existing reviews, with # being the index of the currently edited review editor.
+  // null for no locked editors.
+  const [lockEditors, setLockEditors] = useState<number | null>(null);
 
   // This is if user accessed review page directly (didn't search from home page).
   useEffect(() => {
@@ -50,11 +55,11 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
       }
     });
   }
-
+  
   const uploadReview = async (reviewBody: string) => {
     if (reviewBody.length < 0) return;
     
-    setLockEditors(true);
+    setLockEditors(-1);
     
     fetch(
       `${import.meta.env.VITE_API_URL}/review/`, {
@@ -72,7 +77,7 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
       //console.log(data);
     })
     .finally(() => {
-      setLockEditors(false);
+      setLockEditors(null);
       refreshReviews();
     });
   }
@@ -80,7 +85,7 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
   const uploadEditedReview = (review: T_Review, index: number) => {
     console.log('editReview -> ', review);
 
-    setLockEditors(true);
+    setLockEditors(index);
 
     fetch(
       `${import.meta.env.VITE_API_URL}/review/`, {
@@ -99,25 +104,43 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
       //console.log(data);
     })
     .finally(() => {
-      setLockEditors(false);
+      setLockEditors(null);
       refreshReviews();
     });
   }
 
   // DEBUGGING // I want LoadSpinner to appear only once at a time.
   // const uploadReview = async (reviewBody: string) => {
+  //   setLockEditors(-1);
+  //   (async() => {
+  //     await setTimeout(() => { 
+  //       setLockEditors(null);
+  //       refreshReviews();
+  //     }, 2000);
+  //   })();
   // }
   // const uploadEditedReview = (review: T_Review, index: number) => {
+  //   console.log('uploadEditedReview', index);
+  //   setLockEditors(index);
+  //   (async() => {
+  //     await setTimeout(() => {
+  //       console.log('lockEditors2', lockEditors);
+  //       setLockEditors(null);
+  //       refreshReviews();
+  //     }, 2000);
+  //   })();
   // }
 
+  useEffect(() => { console.log('lockEditors ', lockEditors); }, [lockEditors]);
+
   const cancelReviewEditing = (index: number) => {
-    console.log('cancelReviewEditing -> ', index);
+    //console.log('cancelReviewEditing -> ', index);
 
     changeReviewToEditing(index, false);
   }
 
   const changeReviewToEditing = (index: number, isEditing: boolean) => {
-    console.log('changeReviewToEditing -> ', index);
+    //console.log('changeReviewToEditing -> ', index);
     
     const revs = [ ...reviews as T_Review[] ];
     revs[index].isEditing = isEditing;
@@ -125,7 +148,7 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
   }
   
   const renderReview = (index: number, review: T_Review) => {
-    console.log('renderReview -> ', review.userId, user?.id, review.userId === user?.id);
+    //console.log('renderReview -> ', review, user);
 
     if (review.isEditing) {
       return (
@@ -144,12 +167,17 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
       return (
         <div key={index} className='m-4 p-4 bg-gray-700'>
           {review.userId === user?.id &&
-            <button onClick={() => changeReviewToEditing(index, true)}>Edit</button>
+            <button className='block p-0.5 px-2 mb-2 bg-gray-600 hover:bg-gray-500 cursor-default' onClick={() => changeReviewToEditing(index, true)}>Edit</button>
           }
-          <img className='inline-block mr-3' src={review.user.avatarURL} width={40} />
+          <p>📄 {new Date(review.createdOn).toUTCString()}</p>
+          {review.editedOn &&
+            <p>✏️ {new Date(review.editedOn).toUTCString()}</p>
+          }
+
+          <img className='inline-block mt-2 mr-3' src={review.user.avatarURL} width={40} />
           <h4 className='inline-block font-semibold'>{review.user.displayName}</h4>
           
-          <ReactMarkdown className="prose prose-invert" children={review.body}></ReactMarkdown>
+          <ReactMarkdown className="prose prose-invert prose-hr:m-0 prose-hr:invert" children={review.body}></ReactMarkdown>
         </div>
       )
     }

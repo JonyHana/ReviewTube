@@ -8,8 +8,9 @@ type T_RESTCreateReview = {
   reviewBody: string;
 };
 
-type T_RESTUpdateReview = T_RESTCreateReview & {
+type T_RESTUpdateReview = {
   reviewId: number;
+  reviewBody: string;
 }
 
 const isLoggedIn = async (req: Request, res: Response, next: NextFunction) => {
@@ -37,7 +38,7 @@ router.post('/', async (req: Request, res: Response) => {
 
 // When the user edits one of their reviews.
 router.put('/', async (req: Request, res: Response) => {
-  const { ytVideoId, reviewId, reviewBody }: T_RESTUpdateReview = req.body;
+  const { reviewId, reviewBody }: T_RESTUpdateReview = req.body;
   const userEmail = (req.user as Express.User).email;
   
   const post = await updateReview({
