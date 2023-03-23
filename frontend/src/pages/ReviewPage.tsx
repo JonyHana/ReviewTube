@@ -21,6 +21,8 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
   // null for no locked editors.
   const [lockEditors, setLockEditors] = useState<number | null>(null);
 
+  const [editReservedTo, setEditReservedTo] = useState<number | null>(null);
+
   // This is if user accessed review page directly (didn't search from home page).
   useEffect(() => {
     if (location.state?.reviews) {
@@ -49,6 +51,7 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
           revs.push({ ...v, isEditing: false });
         });
         setReviews(revs);
+        setEditReservedTo(null);
       }
       else {
         setErrorMsg(data.error);
@@ -109,30 +112,6 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
     });
   }
 
-  // DEBUGGING // I want LoadSpinner to appear only once at a time.
-  // const uploadReview = async (reviewBody: string) => {
-  //   setLockEditors(-1);
-  //   (async() => {
-  //     await setTimeout(() => { 
-  //       setLockEditors(null);
-  //       refreshReviews();
-  //     }, 2000);
-  //   })();
-  // }
-  // const uploadEditedReview = (review: T_Review, index: number) => {
-  //   console.log('uploadEditedReview', index);
-  //   setLockEditors(index);
-  //   (async() => {
-  //     await setTimeout(() => {
-  //       console.log('lockEditors2', lockEditors);
-  //       setLockEditors(null);
-  //       refreshReviews();
-  //     }, 2000);
-  //   })();
-  // }
-
-  useEffect(() => { console.log('lockEditors ', lockEditors); }, [lockEditors]);
-
   const cancelReviewEditing = (index: number) => {
     //console.log('cancelReviewEditing -> ', index);
 
@@ -141,10 +120,13 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
 
   const changeReviewToEditing = (index: number, isEditing: boolean) => {
     //console.log('changeReviewToEditing -> ', index);
+    if (isEditing && editReservedTo && index !== editReservedTo) return;
     
     const revs = [ ...reviews as T_Review[] ];
     revs[index].isEditing = isEditing;
     setReviews(revs);
+
+    setEditReservedTo(isEditing ? index : null);
   }
   
   const renderReview = (index: number, review: T_Review) => {
@@ -176,8 +158,7 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
 
           <img className='inline-block mt-2 mr-3' src={review.user.avatarURL} width={40} />
           <h4 className='inline-block font-semibold'>{review.user.displayName}</h4>
-          
-          <ReactMarkdown className="prose prose-invert prose-hr:m-0 prose-hr:invert" children={review.body}></ReactMarkdown>
+          <ReactMarkdown className="mt-3 prose prose-invert prose-hr:m-0 prose-hr:invert" children={review.body}></ReactMarkdown>
         </div>
       )
     }
