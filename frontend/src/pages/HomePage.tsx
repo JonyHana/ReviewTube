@@ -1,6 +1,7 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import LoginButton from "../components/LoginButton";
+import LogoutButton from "../components/LogoutButton";
 import { T_UserInfo_Prop } from "../types";
 
 const HomePage = ({ user }: T_UserInfo_Prop) => {
@@ -78,7 +79,13 @@ const HomePage = ({ user }: T_UserInfo_Prop) => {
           </div>
         }
         
-        {!user ? <LoginButton /> : null}
+        {!user
+          ? <LoginButton />
+          :<>
+            <span className="mr-2">Not you?</span>
+            <LogoutButton />
+          </>
+          }
       </div>
     </div>
   )

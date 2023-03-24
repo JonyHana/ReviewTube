@@ -8,7 +8,10 @@ function App() {
   const [userInfo, setUserInfo] = useState<T_UserInfo | null>(null);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/user-ctx/`, { credentials: "include" })
+    fetch(
+      `${import.meta.env.VITE_API_URL}/user-ctx/`,
+      { method: 'GET', credentials: "include" }
+    )
     .then((res) => res.json())
     .then((data) => {
       if (data.displayName) {

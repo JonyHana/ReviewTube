@@ -101,4 +101,11 @@ router.get('/oauth2/redirect/google', passport.authenticate('google', {
   failureRedirect: `${process.env.FRONTEND_URL}/login_error`,
 }));
 
+router.post('/logout', function(req, res, next){
+  req.logout(function(err) {
+    if (err) { return next(err); }
+    res.redirect('/');
+  });
+});
+
 export default router;

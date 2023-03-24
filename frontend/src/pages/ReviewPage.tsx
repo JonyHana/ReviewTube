@@ -1,4 +1,4 @@
-import { MouseEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
 
 import LoginButton from '../components/LoginButton';
@@ -7,6 +7,7 @@ import ReviewEditor from '../components/ReviewEditor';
 import { T_Review, T_UserInfo_Prop } from '../types';
 
 import ReactMarkdown from 'react-markdown';
+import Navbar from '../components/Navbar';
 
 const ReviewPage = ({ user }: T_UserInfo_Prop) => {
   const { id } = useParams();
@@ -60,6 +61,8 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
   }
   
   const uploadReview = async (reviewBody: string) => {
+    //console.log('uploadReview -> ', review);
+
     if (reviewBody.length < 0) return;
     
     setLockEditors(-1);
@@ -86,7 +89,7 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
   }
   
   const uploadEditedReview = (review: T_Review, index: number) => {
-    console.log('editReview -> ', review);
+    //console.log('editReview -> ', review);
 
     setLockEditors(index);
 
@@ -166,6 +169,7 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
   
   return (
     <>
+      <Navbar />
       {!errorMsg ? (
           <>
             <iframe
