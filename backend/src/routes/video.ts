@@ -1,4 +1,6 @@
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
+import { z, ZodError } from 'zod';
+
 import { getReviews } from '../controllers/reviewController';
 
 const router = express.Router();
@@ -29,47 +31,55 @@ type T_YTInfoBody = {
   };
 };
 
+// YouTube video IDs are 11 characters long.
+//  Though Google has not mentioned this being an indefinite standard,
+//  so this could end up changing in the future.
+const RESTYouTubeIDValidateSchema = z.string().length(11);
+
 // When either a user or visitor searches a review page by YT video id.
 // This will gather the reviews (if there's any) for that review page.
 //  If there are none, it will let the user know.
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
   let { id } = req.params;
-
-  // YouTube video IDs are 11 characters long.
-  //  Though Google has not mentioned this being an indefinite standard,
-  //  so this could end up changing in the future.
-  id = id.substring(0, 11);
-
-  // Note: Maybe load existing reviews but don't allow people to post reviews?
-  //  If so, will need to check if video has reviews first, otherwise just execute code blocks below countReviews.
-  // countReviews(id);
-  // if (countReviews(id) < 0) {
   
-  // Note: Added production check so I don't keep hitting the third-party API during development.
-  //console.log('ping check', new Date().getTime().toString().substring(0, Math.floor(Math.random() * 12)));
-  if (process.env.NODE_ENV === 'production') {
-    // Check to see if YT video exists.
-    //  If checking through the API and doesn't exist then (public) video doesn't exist.
-    //  If it's in the DB but doesn't exist, then video may have been set to private or deleted.
-    let apiFetch = `https://www.googleapis.com/youtube/v3/videos?key=${YT_API_KEY}&part=status&id=${id}`;
-    let fetchRes = await fetch(apiFetch);
-    let fetchResData: T_YTInfoBody = await fetchRes.json();
+  try {
+    RESTYouTubeIDValidateSchema.parse(id);
     
-    if (fetchResData.items.length === 0) {
-      return res.json({
-        error: 'Video does not exist.',
-      });
+    // Note: Added production check so I don't keep hitting the third-party API during development.
+    if (process.env.NODE_ENV === 'production') {
+      // Check to see if YT video exists.
+      //  If checking through the API and doesn't exist then (public) video doesn't exist.
+      //  If it's in the DB but doesn't exist, then video may have been set to private or deleted.
+      let apiFetch = `https://www.googleapis.com/youtube/v3/videos?key=${YT_API_KEY}&part=status&id=${id}`;
+      let fetchRes = await fetch(apiFetch);
+      let fetchResData: T_YTInfoBody = await fetchRes.json();
+      
+      if (fetchResData.items.length === 0) {
+        return res.json({
+          error: 'Video does not exist.',
+        });
+      }
+      
+      if (!fetchResData.items[0].status.embeddable) {
+        return res.json({
+          error: 'Video exists but cannot be embedded. Prohibited by the YouTube channel of the video.',
+        });
+      }
     }
     
-    if (!fetchResData.items[0].status.embeddable) {
-      return res.json({
-        error: 'Video exists but cannot be embedded. Prohibited by the YouTube channel of the video.',
-      });
-    }
+    const reviews = await getReviews(id);
+    res.json(reviews);
   }
-  
-  const reviews = await getReviews(id);
-  res.json(reviews);
+  catch (err) {
+    if (err instanceof ZodError) {
+      //console.log('[ZodError] GET video/:id -> err.message =', err.message);
+      return res.json({
+        error: 'Invalid YouTube video ID.',
+      });
+    }
+    res.status(400);
+    next(err);
+  }
 });
 
 export default router;

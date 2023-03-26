@@ -30,3 +30,9 @@ export type T_ReviewEditor_Prop = {
   review?: T_Review;
   index?: number;
 }
+
+export type T_UploadReview_FuncParams = {
+  body: string,
+  id?: number,
+  renderIndex?: number
+}

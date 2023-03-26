@@ -4,7 +4,7 @@ import { useParams, useLocation, Link } from 'react-router-dom';
 import LoginButton from '../components/LoginButton';
 import ReviewEditor from '../components/ReviewEditor';
 
-import { T_Review, T_UserInfo_Prop } from '../types';
+import { T_Review, T_UploadReview_FuncParams, T_UserInfo_Prop } from '../types';
 
 import ReactMarkdown from 'react-markdown';
 import Navbar from '../components/Navbar';
@@ -22,7 +22,8 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
   // null for no locked editors.
   const [lockEditors, setLockEditors] = useState<number | null>(null);
 
-  const [editReservedTo, setEditReservedTo] = useState<number | null>(null);
+  // This only counts towards editors of existing review, not the top editor for creating reviews.
+  const [editorReservedTo, setEditorReservedTo] = useState<number | null>(null);
 
   // This is if user accessed review page directly (didn't search from home page).
   useEffect(() => {
@@ -38,80 +39,78 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
       refreshReviews();
     }
   }, []);
-
-  const refreshReviews = () => {
-    fetch(
+  
+  const refreshReviews = async () => {
+    const res = await fetch(
       `${import.meta.env.VITE_API_URL}/video/${id}`,
       { method: 'GET' }
-    )
-    .then((res) => { return res.json(); })
-    .then((data) => {
-      if (!data.error) {
-        const revs: T_Review[] = [];
-        data.forEach((v: T_Review, i: number) => {
-          revs.push({ ...v, isEditing: false });
-        });
-        setReviews(revs);
-        setEditReservedTo(null);
-      }
-      else {
-        setErrorMsg(data.error);
-      }
-    });
+    );
+    
+    const data = await res.json();
+    
+    if (!data.error) {
+      const revs: T_Review[] = [];
+
+      data.forEach((v: T_Review, i: number) => {
+        revs.push({ ...v, isEditing: false });
+      });
+
+      setReviews(revs);
+      setEditorReservedTo(null);
+    }
+    else {
+      setErrorMsg(data.error);
+    };
   }
-  
-  const uploadReview = async (reviewBody: string) => {
+
+  const uploadReviewInternal = async (
+    method: 'POST' | 'PUT',
+    review: T_UploadReview_FuncParams
+  ) => {
+    setLockEditors(method === 'POST' ? -1 : review.renderIndex as number);
+
+    const sendBody: any = {
+      reviewBody: review.body
+    };
+
+    if (method === 'PUT') {
+      sendBody.reviewId = review.id;
+    }
+    else {
+      sendBody.ytVideoId = id;
+    }
+
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/review/`, {
+        method: method,
+        credentials: 'include',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(sendBody)
+      }
+    );
+    
+    //const data = await res.json();
+    //console.log(data);
+
+    setLockEditors(null);
+    refreshReviews();
+  }
+
+  const uploadReview = (reviewBody: string) => {
     //console.log('uploadReview -> ', review);
 
-    if (reviewBody.length < 0) return;
-    
-    setLockEditors(-1);
-    
-    fetch(
-      `${import.meta.env.VITE_API_URL}/review/`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          ytVideoId: id,
-          reviewBody
-        })
-      }
-    )
-    .then((res) => { return res.json() })
-    .then((data) => {
-      //console.log(data);
-    })
-    .finally(() => {
-      setLockEditors(null);
-      refreshReviews();
+    uploadReviewInternal('POST', {
+      body: reviewBody
     });
   }
-  
+
   const uploadEditedReview = (review: T_Review, index: number) => {
-    //console.log('editReview -> ', review);
-
-    setLockEditors(index);
-
-    fetch(
-      `${import.meta.env.VITE_API_URL}/review/`, {
-        method: 'PUT',
-        credentials: 'include',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          ytVideoId: id,
-          reviewBody: review.body,
-          reviewId: review.id
-        })
-      }
-    )
-    .then((res) => { return res.json() })
-    .then((data) => {
-      //console.log(data);
-    })
-    .finally(() => {
-      setLockEditors(null);
-      refreshReviews();
+    //console.log('uploadEditedReview -> ', review);
+    
+    uploadReviewInternal('PUT', {
+      body: review.body,
+      id: review.id,
+      renderIndex: index
     });
   }
 
@@ -123,13 +122,13 @@ const ReviewPage = ({ user }: T_UserInfo_Prop) => {
 
   const changeReviewToEditing = (index: number, isEditing: boolean) => {
     //console.log('changeReviewToEditing -> ', index);
-    if (isEditing && editReservedTo && index !== editReservedTo) return;
+    if (isEditing && editorReservedTo && index !== editorReservedTo) return;
     
     const revs = [ ...reviews as T_Review[] ];
     revs[index].isEditing = isEditing;
     setReviews(revs);
 
-    setEditReservedTo(isEditing ? index : null);
+    setEditorReservedTo(isEditing ? index : null);
   }
   
   const renderReview = (index: number, review: T_Review) => {
