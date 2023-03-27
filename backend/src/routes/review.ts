@@ -8,7 +8,7 @@ import {
   T_RESTCreateReview,
   RESTUpdateReviewSchema,
   T_RESTUpdateReview
-} from '../types/review';
+} from '../types/reviewTypes';
 
 const router = express.Router();
 

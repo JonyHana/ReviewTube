@@ -4,9 +4,15 @@ import LoadingSpinner from './LoadingSpinner';
 
 const ReviewEditor = ({ lockEditor, review, index, uploadCallback, uploadEditCallback, cancelEditCallback }: T_ReviewEditor_Prop) => {
   const [reviewDraft, setReviewDraft] = useState<string>(review ? review.body : '');
+  const [errorMsg, setErrorMsg] = useState<string>('');
   
   const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (reviewDraft.length === 0) {
+      setErrorMsg('Cannot submit empty review.');
+      return;
+    }
 
     if (uploadEditCallback) {
       const newReview = { ...review, body: reviewDraft };
@@ -52,6 +58,10 @@ const ReviewEditor = ({ lockEditor, review, index, uploadCallback, uploadEditCal
 
           {review &&
             <button className='ml-2 bg-red-700 hover:bg-red-800 border-red-700 hover:border-red-800 text-sm border-4 text-white py-1 px-2 rounded cursor-default' onClick={handleDraftCancel}>Cancel</button>
+          }
+          
+          {errorMsg.length > 0 &&
+            <p className='text-red-400 font-semibold'>Cannot submit an empty review.</p>
           }
         </div>
       </form>
