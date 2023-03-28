@@ -40,7 +40,7 @@ const RESTYouTubeIDValidateSchema = z.string().length(11);
 // This will gather the reviews (if there's any) for that review page.
 //  If there are none, it will let the user know.
 router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
-  let { id } = req.params;
+  const { id } = req.params;
   
   try {
     RESTYouTubeIDValidateSchema.parse(id);
@@ -50,10 +50,17 @@ router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
       // Check to see if YT video exists.
       //  If checking through the API and doesn't exist then (public) video doesn't exist.
       //  If it's in the DB but doesn't exist, then video may have been set to private or deleted.
-      let apiFetch = `https://www.googleapis.com/youtube/v3/videos?key=${YT_API_KEY}&part=status&id=${id}`;
-      let fetchRes = await fetch(apiFetch);
-      let fetchResData: T_YTInfoBody = await fetchRes.json();
-      
+      const apiFetch = `https://www.googleapis.com/youtube/v3/videos?key=${YT_API_KEY}&part=status&id=${id}`;
+      const fetchRes = await fetch(apiFetch);
+      const fetchResData: T_YTInfoBody = await fetchRes.json();
+
+      // Strong chance we've hit the API limit for the day.
+      if (!fetchResData.items) {
+        return res.json({
+          error: 'Error occured while trying to retrieve YouTube video.'
+        });
+      }
+
       if (fetchResData.items.length === 0) {
         return res.json({
           error: 'Video does not exist.',
