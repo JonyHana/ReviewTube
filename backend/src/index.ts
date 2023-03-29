@@ -26,8 +26,7 @@ app.use(cors({
 }));
 
 let redisClient: RedisClientType | null = null;
-//if (process.env.NODE_ENV === 'production') {
-if (true) {
+if (process.env.NODE_ENV === 'production') {
   redisClient = createClient({ url: process.env.REDIS_URL });
   redisClient
     .connect()
@@ -60,7 +59,7 @@ app.use(session({
   ),
   proxy: process.env.NODE_ENV === 'production',
   cookie: {
-    maxAge: 604800000, // 1 week; unit: ms
+    maxAge: 172800000, // 2 days; unit: ms
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
   }
