@@ -2,11 +2,14 @@ require("dotenv").config();
 
 import express, { Request, Response, NextFunction } from 'express';
 import session, { MemoryStore } from 'express-session';
+import { createClient } from 'redis';
+import RedisStore from 'connect-redis';
 import cors from 'cors';
 
 import authMiddleware from './middleware/passport';
 import reviewRoute from './routes/review';
 import videoRoute from './routes/video';
+import { RedisClientType } from '@redis/client';
 
 const app = express();
 
@@ -22,12 +25,35 @@ app.use(cors({
   credentials: true
 }));
 
+let redisClient: RedisClientType | null = null;
+if (process.env.NODE_ENV === 'production') {
+  redisClient = createClient({ url: process.env.REDIS_URL });
+  redisClient
+    .connect()
+    .catch((e) => {
+      console.log('[Redis Error] -> ', e);
+      redisClient?.disconnect();
+      redisClient = null;
+    })
+    .finally(() => {
+      if (redisClient === null) {
+        throw new Error('Error occured while connecting to Redis. Exiting..');
+      }
+      else {
+        console.log('Connected to Redis @ ', process.env.REDIS_URL);
+      }
+    });
+}
+
 app.use(session({
   secret: process.env.SESSION_SECRET_KEY,
   resave: false, // Don't save session if unmodified.
   saveUninitialized: false, // Don't create session until something stored.
-  store: new MemoryStore(), // REMINDER: MemoryStore is NOT production ready!
-  //store: new SQLiteStore({ db: 'sessions.db', dir: './var/db' }),
+  store: (
+    !redisClient
+    ? new MemoryStore()
+    : new RedisStore({ client: redisClient, prefix: "myapp:" })
+  ),
   rolling: true, // Force the resetting of session identifier cookie. Expiration countdown set to original maxAge.
   cookie: {
     maxAge: 604800000, // 1 week; unit: ms
