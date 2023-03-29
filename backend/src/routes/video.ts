@@ -3,6 +3,9 @@ import { z, ZodError } from 'zod';
 
 import { getReviews } from '../controllers/reviewController';
 
+//import fetch from 'node-fetch';
+import axios from 'axios';
+
 const router = express.Router();
 
 const YT_API_KEY = process.env["YT_API_KEY"];
@@ -51,8 +54,8 @@ router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
       //  If checking through the API and doesn't exist then (public) video doesn't exist.
       //  If it's in the DB but doesn't exist, then video may have been set to private or deleted.
       const apiFetch = `https://www.googleapis.com/youtube/v3/videos?key=${YT_API_KEY}&part=status&id=${id}`;
-      const fetchRes = await fetch(apiFetch);
-      const fetchResData: T_YTInfoBody = await fetchRes.json();
+      const fetchRes = await axios.get(apiFetch);
+      const fetchResData: T_YTInfoBody = await fetchRes.data;
 
       // Strong chance we've hit the API limit for the day.
       if (!fetchResData.items) {
