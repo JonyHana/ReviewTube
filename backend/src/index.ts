@@ -10,6 +10,8 @@ import videoRoute from './routes/video';
 
 const app = express();
 
+const PORT = process.env.PORT || 3000;
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -47,4 +49,6 @@ app.get('/user-ctx', async (req: Request, res: Response) => {
   });
 });
 
-app.listen(3000);
+app.listen(Number(PORT), () => {
+  console.log(`API listening at http://localhost:${PORT}`);
+});
