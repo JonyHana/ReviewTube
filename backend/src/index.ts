@@ -53,11 +53,12 @@ app.use(session({
   store: (
     !redisClient
     ? new MemoryStore()
-    : new RedisStore({ client: redisClient, prefix: "myapp:" })
+    : new RedisStore({
+      client: redisClient,
+      prefix: "myapp:"
+    })
   ),
-  proxy: true,
-  //rolling: true, // Force the resetting of session identifier cookie. Expiration countdown set to original maxAge.
-  rolling: false,
+  proxy: process.env.NODE_ENV === 'production',
   cookie: {
     maxAge: 604800000, // 1 week; unit: ms
     secure: process.env.NODE_ENV === 'production',

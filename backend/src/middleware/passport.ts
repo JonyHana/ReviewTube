@@ -28,7 +28,10 @@ passport.use(new GoogleStrategy({
   callbackURL: '/oauth2/redirect/google',
   scope: [ 'email', 'profile' ],
   passReqToCallback: true,
-  proxy: true
+  // https://stackoverflow.com/questions/56818870/why-am-i-getting-redirect-uri-mismatch-error-on-heroku-with-my-oauth2-authentica
+  // https://stackoverflow.com/questions/66392718/what-is-the-use-of-a-proxy-in-passport-google-oauth20-in-nodejs
+  // Proxy also applies to express-session when dealing with cookies.
+  proxy: process.env.NODE_ENV === 'production'
 },
 async function (req: any, accessToken: any, refreshToken: any, profile: any, done: any) {
   const { email, displayName, picture } = profile;
@@ -105,7 +108,11 @@ router.get('/oauth2/redirect/google', passport.authenticate('google', {
 router.post('/logout', function(req, res, next){
   req.logout(function(err) {
     if (err) { return next(err); }
-    res.redirect('/');
+    // This is mainly for Redis in production (MemoryStorage for dev).
+    //  Prevents persistence of logged out users.
+    req.session.destroy(() => {
+      res.redirect('/');
+    });
   });
 });
 
