@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "start": "npm run build && serve --listen 8080 --single ./dist"
+    "start": "npm run build && serve --listen 8080 --cors --single ./dist"
   },
   "dependencies": {
     "react": "^18.2.0",
