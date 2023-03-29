@@ -26,7 +26,8 @@ app.use(cors({
 }));
 
 let redisClient: RedisClientType | null = null;
-if (process.env.NODE_ENV === 'production') {
+//if (process.env.NODE_ENV === 'production') {
+if (true) {
   redisClient = createClient({ url: process.env.REDIS_URL });
   redisClient
     .connect()
@@ -54,7 +55,9 @@ app.use(session({
     ? new MemoryStore()
     : new RedisStore({ client: redisClient, prefix: "myapp:" })
   ),
-  rolling: true, // Force the resetting of session identifier cookie. Expiration countdown set to original maxAge.
+  proxy: true,
+  //rolling: true, // Force the resetting of session identifier cookie. Expiration countdown set to original maxAge.
+  rolling: false,
   cookie: {
     maxAge: 604800000, // 1 week; unit: ms
     secure: process.env.NODE_ENV === 'production',
