@@ -27,7 +27,8 @@ passport.use(new GoogleStrategy({
   clientSecret: process.env['GOOGLE_CLIENT_SECRET'],
   callbackURL: '/oauth2/redirect/google',
   scope: [ 'email', 'profile' ],
-  passReqToCallback: true
+  passReqToCallback: true,
+  proxy: true
 },
 async function (req: any, accessToken: any, refreshToken: any, profile: any, done: any) {
   const { email, displayName, picture } = profile;
