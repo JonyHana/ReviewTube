@@ -30,17 +30,25 @@ To deploy the frontend service, you will need to do the following:
 
 ### [Environment Variables]
 #### Frontend:
-`VITE_API_URL`: The URL for the API endpoint of your deployed Railway backend.
-`PORT`: Set this to 8080. Used for the static file server that'll provide the Vite-built asset files.
+**`VITE_API_URL`**: The URL for the API endpoint of your deployed Railway backend.
+\
+**`PORT`**: Set this to 8080. Used for the static file server that'll provide the Vite-built asset files.
 #### Backend:
-`NODE_ENV`: Set to either `development` or `production`.
-`GOOGLE_CLIENT_ID`: An "OAuth 2.0 Client IDs" Web application key that can be generated on Google Cloud, paired with `GOOGLE_CLIENT_SECRET`.
-`GOOGLE_CLIENT_SECRET`: Similar to `GOOGLE_CLIENT_ID`.
-`YT_API_KEY`: The API key credentials for YouTube Data API v3 that you can generate on Google Cloud.
-`FRONTEND_URL`: The URL for the static file server that'll provide the Vite-built asset files.
-`SESSION_SECRET_KEY`: Used for express-session. This can be whatever you want to set it to; for example, you can use some long random string for simplicity.
-`DATABASE_URL`: The URL that Prisma will use for connecting to the MySQL database. You can just set this to `${{MySQL.MYSQL_URL}}` if your database is provisioned inside the Railway project.
-`REDIS_URL`: The URL that the Express Redis client will connect to. You can just set this to `${{Redis.REDIS_URL}}` if Redis is provisioned inside the Railway project.
+**`NODE_ENV`**: Set to either `development` or `production`.
+\
+**`GOOGLE_CLIENT_ID`**: An "OAuth 2.0 Client IDs" Web application key that can be generated on Google Cloud, paired with `GOOGLE_CLIENT_SECRET`.
+\
+**`GOOGLE_CLIENT_SECRET`**: Similar to `GOOGLE_CLIENT_ID`.
+\
+**`YT_API_KEY`**: The API key credentials for YouTube Data API v3 that you can generate on Google Cloud.
+\
+**`FRONTEND_URL`**: The URL for the static file server that'll provide the Vite-built asset files.
+\
+**`SESSION_SECRET_KEY`**: Used for express-session. This can be whatever you want to set it to; for example, you can use some long random string for simplicity.
+\
+**`DATABASE_URL`**: The URL that Prisma will use for connecting to the MySQL database. You can just set this to `${{MySQL.MYSQL_URL}}` if your database is provisioned inside the Railway project.
+\
+**`REDIS_URL`**: The URL that the Express Redis client will connect to. You can just set this to `${{Redis.REDIS_URL}}` if Redis is provisioned inside the Railway project.
 
 #### Note (for Google OAuth):
 You will need to be signed in to your GMail account before you can continue.
